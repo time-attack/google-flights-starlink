@@ -1,5 +1,7 @@
 # Google Flights Starlink Checker
 
+> *definetly not a vibecoded chrome extension that was coded in 20 minutes*
+
 Google Flights Starlink Checker is a Chrome extension that detects and displays SpaceX Starlink Wi-Fi availability on Google Flights search results. The extension queries live fleet tracking databases and applies airline-specific fleet rules to verify in-flight connectivity for individual flights.
 
 ---
