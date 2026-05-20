@@ -29,6 +29,23 @@ Hovering over a badge displays a portal-injected tooltip showing a detailed brea
 
 ---
 
+## Why This Extension is Superior
+
+Compared to other extensions available on the Chrome Web Store, this extension is designed from the ground up to solve the specific limitations of existing tools:
+
+### 1. *Google Flights Starlink Indicator* (jjfljoifenkfdbldliakmmjhdkbhehoi)
+* **The Issue:** This extension is completely non-functional on modern Google Flights. You can perform searches, but no badges or indicators ever render.
+* **Why Ours is Better:** This extension broke because Google Flights enforces a strict **Trusted Types** security policy. It attempts to inject HTML templates using `innerHTML`, which Chrome intercepts and blocks. Our extension constructs all SVG icons, badge wrappers, and tooltips programmatically using standard DOM APIs (`document.createElementNS` and `appendChild`). It runs with zero runtime security exceptions.
+
+### 2. *SeatWiFi - Flight WiFi Checker* (gkgmfcdkcemfcohoifeaebjlchpaphja)
+* **The Issue:** While accurate for legacy, slow Wi-Fi providers (Viasat, Panasonic, Gogo), it displays inaccurate or missing information for Starlink rollouts. It does not track retrofitted aircraft individually.
+* **Why Ours is Better:** SeatWiFi relies on coarse, static datasets matching by airline or aircraft type. During active rollouts (e.g., United Airlines retrofitting planes week-by-week), static rules fail. Our extension utilizes a **hybrid verification waterfall**:
+  * **Real-time Tail Lookups:** For airlines like United, it queries a live tracking API to fetch the *exact tail number* assigned to the flight on your travel date. If the plane has had the Starlink radome installed, it confirms it immediately.
+  * **Model-Specific Scraper:** It scrapes scheduled aircraft models from expanded flight cards, matching specific configurations (such as Hawaiian A321neo/A330 vs. 717s or Qatar 777s/A350s vs. 787s).
+  * **No Legacy Noise:** Designed specifically for travelers who prioritize Starlink connectivity, making it easy to filter out legacy systems.
+
+---
+
 ## Key Features
 
 * **Single Page Application (SPA) Support:** Tracks dynamically loaded flights and filter updates on Google Flights using a throttled `MutationObserver` without impacting page performance.
