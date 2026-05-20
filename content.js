@@ -252,25 +252,36 @@ async function resolveStarlinkStatus(card, badge, segments) {
       return;
     }
     
-    // 6. Qatar Airways (Rollout on selected Boeing 777s)
+    // 6. Qatar Airways (completed on Boeing 777 & Airbus A350, active on Boeing 787)
     if (airline === 'QR') {
       if (seg.aircraft && seg.aircraft !== 'Unknown') {
         applyQatarRules(seg);
       } else {
         seg.status = 'likely';
-        seg.details = 'Qatar Airways: Active rollout on selected Boeing 777-300ER / 777-9 aircraft.';
+        seg.details = 'Qatar Airways: Starlink Available on all Boeing 777 & Airbus A350 flights; Boeing 787 rollout active.';
       }
       return;
     }
 
-    // 7. Southwest Airlines (Active summer 2026 rollout)
+    // 7. Emirates (active rollout on select Boeing 777s)
+    if (airline === 'EK') {
+      if (seg.aircraft && seg.aircraft !== 'Unknown') {
+        applyEmiratesRules(seg);
+      } else {
+        seg.status = 'likely';
+        seg.details = 'Emirates: Starlink rollout active. Select Boeing 777s are equipped (Free).';
+      }
+      return;
+    }
+
+    // 8. Southwest Airlines (Active summer 2026 rollout)
     if (airline === 'WN') {
       seg.status = 'no';
       seg.details = 'Southwest Airlines: Starlink rollout scheduled to begin summer 2026.';
       return;
     }
     
-    // 8. Default (Panasonic / Viasat / Gogo)
+    // 9. Default (Panasonic / Viasat / Gogo)
     seg.status = 'no';
     seg.details = 'Legacy in-flight Wi-Fi (Panasonic / Viasat / Gogo).';
   });
@@ -306,21 +317,39 @@ function applyHawaiianRules(segment) {
   if (model.includes('a321') || model.includes('a330') || model.includes('airbus') || model.includes('a21n') || model.includes('a332')) {
     segment.status = 'yes';
     segment.details = `Hawaiian Airbus (${segment.aircraft}): Starlink Available (Free).`;
+  } else if (model.includes('787')) {
+    segment.status = 'likely';
+    segment.details = `Hawaiian Boeing 787 (${segment.aircraft}): Starlink rollout active.`;
   } else {
     segment.status = 'no';
-    segment.details = `Hawaiian Boeing (${segment.aircraft}): Leg does not support Starlink.`;
+    segment.details = `Hawaiian Boeing 717 (${segment.aircraft}): Leg does not support Starlink.`;
   }
 }
 
 // Qatar Rules
 function applyQatarRules(segment) {
   const model = segment.aircraft.toLowerCase();
-  if (model.includes('777') || model.includes('77w')) {
+  if (model.includes('777') || model.includes('77w') || model.includes('350') || model.includes('a350')) {
+    segment.status = 'yes';
+    segment.details = `Qatar Airways (${segment.aircraft}): Starlink Available (Free).`;
+  } else if (model.includes('787')) {
     segment.status = 'likely';
-    segment.details = `Qatar Boeing (${segment.aircraft}): Active Starlink rollout in progress.`;
+    segment.details = `Qatar Boeing 787 (${segment.aircraft}): Starlink rollout active.`;
   } else {
     segment.status = 'no';
     segment.details = `Qatar Airways (${segment.aircraft}): Uses legacy high-speed Wi-Fi.`;
+  }
+}
+
+// Emirates Rules
+function applyEmiratesRules(segment) {
+  const model = segment.aircraft.toLowerCase();
+  if (model.includes('777') || model.includes('77w')) {
+    segment.status = 'likely';
+    segment.details = `Emirates Boeing 777 (${segment.aircraft}): Starlink rollout active (Free).`;
+  } else {
+    segment.status = 'no';
+    segment.details = `Emirates (${segment.aircraft}): Uses legacy Wi-Fi (OnAir/Viasat).`;
   }
 }
 
@@ -375,6 +404,8 @@ function checkExpandedAircraftType(card) {
         applyHawaiianRules(seg);
       } else if (seg.airline === 'QR') {
         applyQatarRules(seg);
+      } else if (seg.airline === 'EK') {
+        applyEmiratesRules(seg);
       } else if (seg.airline === 'UA' && seg.status === 'checking') {
         // If United failed API previously, apply model rules
         applyUnitedFallback(seg);

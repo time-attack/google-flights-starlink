@@ -4,6 +4,14 @@ Google Flights Starlink Checker is a Chrome extension that detects and displays 
 
 ---
 
+## The Backstory
+
+This extension was born out of necessity. As a frequent business traveler, reliable in-flight Wi-Fi is one of the most critical factors when booking flights. Having a fast, low-latency connection determines whether a flight is productive work time or dead hours. 
+
+To ensure Starlink access, I am the type of traveler who will willingly select a longer, more expensive, or less convenient flight routing if it guarantees a stable high-speed internet connection. This extension was built to eliminate the manual cross-referencing and guesswork during the flight selection process on Google Flights.
+
+---
+
 ## Visual Previews
 
 ### 1. Injected Starlink Badges
@@ -37,9 +45,11 @@ When a flight card is detected on Google Flights, the extension parses the itine
 
 1. **JSX & ZIPAIR:** 100% fleet-wide rollout. Automatically returns **Available**.
 2. **airBaltic:** 100% of the Airbus A220-300 fleet is actively undergoing installation. Returns **Available**.
-3. **Hawaiian Airlines:** Airbus jets (A321neo & A330-200) are equipped; Boeing jets (717 & 787-9) are not. The extension parses the aircraft model from the expanded details panel to resolve status.
-4. **United Airlines:** Queries the tracker database for the exact tail number assigned (e.g., `N2737U`). If no tail number is assigned yet (flights booked far in advance), it falls back to model-specific rollout heuristics.
-5. **Delta, American, Southwest, JetBlue:** Marked as **No Starlink** (Legacy Wi-Fi providers Viasat, Panasonic, or Gogo).
+3. **Hawaiian Airlines:** Airbus jets (A321neo & A330-200) are equipped; Boeing jets (787-9) are actively rolling out; Boeing 717s are not supported.
+4. **Qatar Airways:** Completed installation on entire Boeing 777 and Airbus A350 fleets (returns **Available**). Active rollout in progress on Boeing 787s.
+5. **Emirates:** Active rollout in progress on Boeing 777 aircraft. Returns **Likely** for 777s as more aircraft are retrofitted.
+6. **United Airlines:** Queries the tracker database for the exact tail number assigned (e.g., `N2737U`). If no tail number is assigned yet (flights booked far in advance), it falls back to model-specific rollout heuristics.
+7. **Delta, American, Southwest, JetBlue:** Marked as **No Starlink** (Legacy Wi-Fi providers Viasat, Panasonic, or Gogo).
 
 ---
 
