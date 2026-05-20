@@ -1,0 +1,92 @@
+# Google Flights Starlink Checker
+
+Google Flights Starlink Checker is a Chrome extension that detects and displays SpaceX Starlink Wi-Fi availability on Google Flights search results. The extension queries live fleet tracking databases and applies airline-specific fleet rules to verify in-flight connectivity for individual flights.
+
+---
+
+## Visual Previews
+
+### 1. Injected Starlink Badges
+The extension inserts Material-designed badges adjacent to the airline names. The badges are color-coded to indicate connectivity status:
+* **Starlink** (Green): Confirmed Starlink availability on the flight.
+* **Starlink Likely / Partial** (Blue): Starlink rollout is active on the fleet, or there is partial availability on multi-segment itineraries.
+* **No Starlink** (Gray): The flight operates with legacy satellite or air-to-ground Wi-Fi.
+
+![Google Flights Starlink Badges](google_flights_starlink_badges.png)
+
+### 2. Multi-Segment Portal Tooltips
+Hovering over a badge displays a portal-injected tooltip showing a detailed breakdown of each individual flight leg, including the specific tail number (when assigned) and aircraft model.
+
+![Google Flights Starlink Tooltip](google_flights_starlink_tooltip.png)
+
+---
+
+## Key Features
+
+* **Single Page Application (SPA) Support:** Tracks dynamically loaded flights and filter updates on Google Flights using a throttled `MutationObserver` without impacting page performance.
+* **Live Fleet Database Queries:** Queries a CORS-compliant proxy worker linked to the United Airlines tracker API to fetch tail-number records in real time.
+* **Persistent Local Caching:** Utilizes a 24-hour cache (`chrome.storage.local`) to reduce duplicate API requests and network overhead.
+* **Dynamic Details Scraper:** Extracts scheduled aircraft models from the card details panel once a flight row is expanded, applying specific airline heuristics on the fly.
+* **Trusted Types Compatibility:** Fully compatible with Google Flights' strict browser security configurations, using programmatic node generation to prevent Trusted HTML violations.
+
+---
+
+## Heuristic and Rule Waterfall
+
+When a flight card is detected on Google Flights, the extension parses the itinerary parameters and runs the following ruleset:
+
+1. **JSX & ZIPAIR:** 100% fleet-wide rollout. Automatically returns **Available**.
+2. **airBaltic:** 100% of the Airbus A220-300 fleet is actively undergoing installation. Returns **Available**.
+3. **Hawaiian Airlines:** Airbus jets (A321neo & A330-200) are equipped; Boeing jets (717 & 787-9) are not. The extension parses the aircraft model from the expanded details panel to resolve status.
+4. **United Airlines:** Queries the tracker database for the exact tail number assigned (e.g., `N2737U`). If no tail number is assigned yet (flights booked far in advance), it falls back to model-specific rollout heuristics.
+5. **Delta, American, Southwest, JetBlue:** Marked as **No Starlink** (Legacy Wi-Fi providers Viasat, Panasonic, or Gogo).
+
+---
+
+## Project Structure
+
+```
+starlinkonly/
+├── manifest.json         # Manifest V3 extension configuration
+├── background.js         # API proxy worker and local storage cache manager
+├── content.js            # DOM parser, rules engine, and badge injector
+├── styles.css            # Stylesheets with light/dark theme variables
+├── popup.html            # Extension dashboard UI
+├── popup.js              # Dashboard controller (rollout statistics, manual check)
+├── popup.css             # Dashboard styling
+├── test_flights.html     # Interactive local testing suite
+└── icons/
+    └── icon.svg          # Extension logo (custom vector graphic)
+```
+
+---
+
+## Setup and Installation
+
+### Option A: Loading on Live Google Flights
+1. Clone or download this repository.
+2. Open Google Chrome and go to `chrome://extensions/`.
+3. Toggle the **Developer mode** switch in the top-right corner.
+4. Click **Load unpacked** in the top-left corner.
+5. Select the `starlinkonly/` directory.
+6. Open [Google Flights](https://www.google.com/travel/flights) and perform a search.
+
+### Option B: Local Test Suite
+To verify rendering and interactive features offline:
+1. Double-click the `test_flights.html` file to open it in Chrome.
+2. Click individual cards to simulate expansion and trigger aircraft model scraping.
+3. Use the **Switch to Dark Mode** button in the header to verify theme adaptation.
+
+---
+
+## Security Architecture: Chrome Trusted HTML Compliance
+
+Modern Google web properties enforce a strict **Trusted Types** policy. Direct assignments to `element.innerHTML` or `element.outerHTML` are intercepted by Chrome and blocked to prevent Cross-Site Scripting (XSS) attacks.
+
+To satisfy these security constraints, the extension constructs all DOM nodes and inline vector graphics programmatically:
+```javascript
+const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+svg.appendChild(path);
+```
+This ensures zero runtime security violations and maximum reliability across Google domains.

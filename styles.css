@@ -1,0 +1,195 @@
+/* Starlink Badge Inline Container */
+.starlink-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px; /* Pill style to fit modern Google Flights elements */
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 12px;
+  margin-left: 8px;
+  cursor: help;
+  vertical-align: middle;
+  transition: background-color 0.2s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(60,64,67,0.1);
+}
+
+.starlink-badge:hover {
+  transform: scale(1.04);
+}
+
+.starlink-badge svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  transition: fill 0.2s ease;
+}
+
+/* --- LIGHT MODE COLOURS --- */
+.starlink-badge-yes {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+.starlink-badge-yes svg {
+  fill: #137333;
+}
+
+.starlink-badge-likely {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+}
+.starlink-badge-likely svg {
+  fill: #1a73e8;
+}
+
+.starlink-badge-no {
+  background-color: #f1f3f4;
+  color: #5f6368;
+}
+.starlink-badge-no svg {
+  fill: #5f6368;
+}
+
+/* --- DARK MODE COLOURS --- */
+.starlink-badge.dark-theme.starlink-badge-yes {
+  background-color: #0f3d1f;
+  color: #81c995;
+}
+.starlink-badge.dark-theme.starlink-badge-yes svg {
+  fill: #81c995;
+}
+
+.starlink-badge.dark-theme.starlink-badge-likely {
+  background-color: #132d4e;
+  color: #8ab4f8;
+}
+.starlink-badge.dark-theme.starlink-badge-likely svg {
+  fill: #8ab4f8;
+}
+
+.starlink-badge.dark-theme.starlink-badge-no {
+  background-color: #303134;
+  color: #9aa0a6;
+}
+.starlink-badge.dark-theme.starlink-badge-no svg {
+  fill: #9aa0a6;
+}
+
+/* --- GLOBAL PORTAL-BASED TOOLTIP --- */
+/* (Injected at document.body to prevent parent container overflow clipping) */
+.starlink-tooltip {
+  position: absolute;
+  z-index: 999999;
+  background-color: #2f3542;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 320px;
+}
+
+.starlink-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Light Theme Tooltip styling */
+.starlink-tooltip.light-theme {
+  background-color: #ffffff;
+  color: #202124;
+  border: 1px solid #dadce0;
+  box-shadow: 0 4px 16px rgba(60,64,67,0.18);
+}
+
+.starlink-tooltip-header {
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 5px;
+}
+
+.starlink-tooltip.light-theme .starlink-tooltip-header {
+  border-bottom: 1px solid #e8eaed;
+}
+
+.starlink-tooltip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.starlink-tooltip-segment {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.starlink-tooltip-segment-title {
+  font-weight: 500;
+  color: #38bdf8;
+  margin-bottom: 2px;
+}
+.starlink-tooltip.light-theme .starlink-tooltip-segment-title {
+  color: #1a73e8;
+}
+
+.starlink-tooltip-segment-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+.starlink-tooltip.light-theme .starlink-tooltip-segment-detail {
+  color: #5f6368;
+}
+
+.starlink-tooltip-status {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.status-yes {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+.starlink-tooltip.light-theme .status-yes {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+.status-likely {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+.starlink-tooltip.light-theme .status-likely {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+}
+
+.status-no {
+  background-color: rgba(156, 163, 175, 0.2);
+  color: #d1d5db;
+}
+.starlink-tooltip.light-theme .status-no {
+  background-color: #f1f3f4;
+  color: #5f6368;
+}

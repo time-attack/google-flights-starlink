@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Starlink Flights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-wrapper">
+        <svg class="header-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="28" height="28">
+          <rect width="128" height="128" rx="28" fill="#0f172a" />
+          <path d="M 34 38 A 42 42 0 0 1 94 38" fill="none" stroke="#10b981" stroke-width="6" stroke-linecap="round" />
+          <path d="M 24 28 A 56 56 0 0 1 104 28" fill="none" stroke="#06b6d4" stroke-width="7" stroke-linecap="round" />
+          <circle cx="64" cy="56" r="6" fill="#10b981" />
+          <g transform="translate(64, 76) rotate(-45)">
+            <path d="M 0 -28 C 1.5 -28, 3.5 -24, 3.5 -18 L 3.5 16 C 3.5 20, 1.5 22, 0 22 C -1.5 22, -3.5 20, -3.5 16 L -3.5 -18 C -3.5 -24, -1.5 -28, 0 -28 Z" fill="#f8fafc" />
+            <path d="M 0 -6 L 26 8 C 27 8.5, 27 10, 25.5 10 L 3.5 4 L -3.5 4 L -25.5 10 C -27 10, -27 8.5, -26 8 Z" fill="#f8fafc" />
+          </g>
+        </svg>
+        <span class="header-title">Starlink Flights</span>
+      </div>
+      <div class="version">v1.0.0</div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-check">Check Flight</button>
+      <button class="tab-btn" id="tab-airlines">Airlines Status</button>
+    </div>
+
+    <!-- Content Sections -->
+    <main class="content">
+      <!-- Section: Checker -->
+      <section class="tab-content active" id="content-check">
+        <div class="card search-card">
+          <h3>Verify Single Flight</h3>
+          <p class="card-desc">Check if a specific flight operates with Starlink Wi-Fi.</p>
+          
+          <form id="check-form">
+            <div class="input-row">
+              <div class="input-group">
+                <label for="flight-num">Flight Number</label>
+                <input type="text" id="flight-num" placeholder="e.g. UA123 or HA50" required autocomplete="off" />
+              </div>
+              <div class="input-group">
+                <label for="flight-date">Departure Date</label>
+                <input type="date" id="flight-date" required />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-submit">
+              <span>Check Status</span>
+              <svg class="spinner hidden" viewBox="0 0 50 50">
+                <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+              </svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- Result Container -->
+        <div class="result-container hidden" id="result-box">
+          <div class="result-header">
+            <div class="result-route" id="res-route">UA 123</div>
+            <div class="result-badge" id="res-badge">Checking</div>
+          </div>
+          <div class="result-body">
+            <div class="result-detail-row">
+              <span class="detail-label">Status:</span>
+              <span class="detail-val" id="res-status-text">-</span>
+            </div>
+            <div class="result-detail-row">
+              <span class="detail-label">Aircraft:</span>
+              <span class="detail-val" id="res-aircraft">-</span>
+            </div>
+            <div class="result-detail-row">
+              <span class="detail-label">Details:</span>
+              <span class="detail-val" id="res-details">-</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Airline Rollout Info -->
+      <section class="tab-content hidden" id="content-airlines">
+        <div class="airlines-list">
+          <!-- JSX -->
+          <div class="airline-row">
+            <div class="airline-info">
+              <div class="airline-name">JSX</div>
+              <div class="airline-meta">100% of Fleet Equipped</div>
+            </div>
+            <span class="status-pill pill-yes">100% Active</span>
+          </div>
+          <!-- ZIPAIR -->
+          <div class="airline-row">
+            <div class="airline-info">
+              <div class="airline-name">ZIPAIR</div>
+              <div class="airline-meta">100% of Boeing 787-8s Equipped</div>
+            </div>
+            <span class="status-pill pill-yes">100% Active</span>
+          </div>
+          <!-- airBaltic -->
+          <div class="airline-row">
+            <div class="airline-info">
+              <div class="airline-name">airBaltic</div>
+              <div class="airline-meta">A220-300 Rollout Completed/Active</div>
+            </div>
+            <span class="status-pill pill-yes">100% Active</span>
+          </div>
+          <!-- Hawaiian Airlines -->
+          <div class="airline-row">
+            <div class="airline-info">
+              <div class="airline-name">Hawaiian Airlines</div>
+              <div class="airline-meta">Airbus A321neo & A330-200 Active</div>
+            </div>
+            <span class="status-pill pill-yes">Airbus 100%</span>
+          </div>
+          <!-- United Airlines -->
+          <div class="airline-row">
+            <div class="airline-info">
+              <div class="airline-name">United Airlines</div>
+              <div class="airline-meta">Active Rollout. Free for MileagePlus.</div>
+            </div>
+            <span class="status-pill pill-likely">In Progress</span>
+          </div>
+          <!-- Qatar Airways -->
+          <div class="airline-row">
+            <div class="airline-info">
+              <div class="airline-name">Qatar Airways</div>
+              <div class="airline-meta">Installing on Boeing 777-300ER/777-9.</div>
+            </div>
+            <span class="status-pill pill-likely">In Progress</span>
+          </div>
+          <!-- Southwest Airlines -->
+          <div class="airline-row">
+            <div class="airline-info">
+              <div class="airline-name">Southwest Airlines</div>
+              <div class="airline-meta">Rollout starting summer 2026.</div>
+            </div>
+            <span class="status-pill pill-no">Starts 2026</span>
+          </div>
+          <!-- Others -->
+          <div class="airline-row">
+            <div class="airline-info">
+              <div class="airline-name">Other Major Carriers</div>
+              <div class="airline-meta">Delta, American, JetBlue (Viasat/Gogo).</div>
+            </div>
+            <span class="status-pill pill-no">Legacy Wi-Fi</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Auto-injecting verified Starlink badges on Google Flights</span>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

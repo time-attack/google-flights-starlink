@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Google Flights Starlink Extension Test Bench</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  
+  <style>
+    /* Styling for the test runner interface itself (not the extension) */
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Roboto, Arial, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    body.dark-mode {
+      background-color: #202124;
+      color: #f1f5f9;
+    }
+    
+    .test-bench-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 16px;
+    }
+    body.dark-mode .test-bench-header {
+      border-bottom-color: #3c4043;
+    }
+    
+    .toggle-btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background-color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+    }
+    body.dark-mode .toggle-btn {
+      background-color: #303134;
+      color: #ffffff;
+      border-color: #475569;
+    }
+    .toggle-btn:hover {
+      background-color: #f1f5f9;
+    }
+    body.dark-mode .toggle-btn:hover {
+      background-color: #3c4043;
+    }
+
+    /* Mock Google Flights structures */
+    .flights-list {
+      list-style-type: none;
+      padding: 0;
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Simulated Google Flights Row Card */
+    .flight-card {
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+      transition: box-shadow 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+    body.dark-mode .flight-card {
+      background: #303134;
+      border-color: #475569;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .flight-card:hover {
+      box-shadow: 0 4px 12px rgba(60,64,67,0.15);
+    }
+
+    .card-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .col-airline {
+      display: flex;
+      align-items: center;
+      min-width: 200px;
+    }
+    
+    .airline-logo-mock {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background-color: #cbd5e1;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: #475569;
+    }
+
+    /* sSHqwe & tPgKwe are the exact Google Flights class names we target */
+    .sSHqwe.tPgKwe {
+      display: flex;
+      align-items: center;
+    }
+    .sSHqwe.tPgKwe span {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .col-route {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Emission container carrying the data attributes */
+    .col-emissions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 12px;
+      color: #5f6368;
+    }
+    body.dark-mode .col-emissions {
+      color: #9aa0a6;
+    }
+
+    /* Detail expanded panel class (m9ravf jsname="XxAJue") */
+    .expanded-panel {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e8eaed;
+      display: none;
+      font-size: 13px;
+      line-height: 18px;
+    }
+    body.dark-mode .expanded-panel {
+      border-top-color: #3c4043;
+    }
+    .expanded-panel.active {
+      display: block;
+    }
+    
+    .flight-segment-info {
+      margin-bottom: 8px;
+      color: #5f6368;
+    }
+    body.dark-mode .flight-segment-info {
+      color: #cbd5e1;
+    }
+    .aircraft-type-span {
+      font-weight: 500;
+      color: #1a73e8;
+    }
+    body.dark-mode .aircraft-type-span {
+      color: #8ab4f8;
+    }
+  </style>
+
+  <!-- MOCK CHROME EXTENSION APIs FOR LOCAL TESTING -->
+  <script>
+    if (typeof chrome === 'undefined') {
+      window.chrome = {
+        runtime: {
+          sendMessage: (message, callback) => {
+            console.log('[Mock Chrome] Sending background message:', message);
+            
+            if (message.action === 'checkFlight') {
+              // Simulate API delay
+              setTimeout(() => {
+                const flight = message.flightNumber;
+                
+                if (flight === 'UA123') {
+                  // Simulate Starlink-equipped Boeing 737 MAX
+                  callback({
+                    success: true,
+                    data: {
+                      hasStarlink: true,
+                      fallback: {
+                        segments: [{
+                          tail_number: 'N2737U',
+                          aircraft_model: 'Boeing 737 MAX 8',
+                          verified_wifi: 'Starlink'
+                        }]
+                      }
+                    }
+                  });
+                } else if (flight === 'UA999') {
+                  // Simulate Panasonic-equipped Boeing 777 (Legacy)
+                  callback({
+                    success: true,
+                    data: {
+                      hasStarlink: false,
+                      fallback: {
+                        segments: [{
+                          tail_number: 'N78017',
+                          aircraft_model: 'Boeing 777-200ER',
+                          verified_wifi: 'Panasonic'
+                        }]
+                      }
+                    }
+                  });
+                } else {
+                  // Simulate general API fail or not found
+                  callback({ success: false, error: 'Flight not found in database' });
+                }
+              }, 400);
+            }
+          }
+        }
+      };
+      console.log('[Mock Chrome] Extension APIs successfully mocked.');
+    }
+  </script>
+</head>
+<body>
+
+  <div class="test-bench-header">
+    <div>
+      <h1 style="font-family:'Outfit', sans-serif; font-size: 24px; margin-bottom: 4px;">Google Flights Starlink Checker Test Bench</h1>
+      <p style="font-size: 13px; color: #64748b;">Simulates Google Flights listings. Hover over injected pills to test tooltips. Click cards to expand and scrape aircraft types.</p>
+    </div>
+    <button class="toggle-btn" id="theme-toggle">Switch to Dark Mode</button>
+  </div>
+
+  <ul class="flights-list">
+    <!-- Card 1: JSX (XE 123) -->
+    <li class="flight-card" onclick="toggleExpand(this)">
+      <div class="card-summary">
+        <div class="col-airline">
+          <div class="airline-logo-mock">JSX</div>
+          <div class="sSHqwe tPgKwe">
+            <span>JSX</span>
+          </div>
+        </div>
+        <div class="col-route">BUR ➔ LAS (Direct)</div>
+        <div class="col-emissions" data-travelimpactmodelwebsiteurl="https://www.travelimpactmodel.org/lookup/flight?itinerary=BUR-LAS-XE-123-20260520">
+          <div>42 kg CO2e</div>
+          <div style="font-size:10px; color:#137333;">-12% emissions</div>
+        </div>
+      </div>
+      <div class="expanded-panel" jsname="XxAJue">
+        <div class="flight-segment-info">
+          JSX Flight XE 123 • Operated by JSX • Aircraft: <span class="aircraft-type-span">Embraer ERJ-145</span>
+        </div>
+      </div>
+    </li>
+
+    <!-- Card 2: ZIPAIR (ZG 51) -->
+    <li class="flight-card" onclick="toggleExpand(this)">
+      <div class="card-summary">
+        <div class="col-airline">
+          <div class="airline-logo-mock">ZG</div>
+          <div class="sSHqwe tPgKwe">
+            <span>ZIPAIR</span>
+          </div>
+        </div>
+        <div class="col-route">SFO ➔ NRT (Direct)</div>
+        <div class="col-emissions" data-travelimpactmodelwebsiteurl="https://www.travelimpactmodel.org/lookup/flight?itinerary=SFO-NRT-ZG-51-20260520">
+          <div>390 kg CO2e</div>
+          <div>Avg emissions</div>
+        </div>
+      </div>
+      <div class="expanded-panel" jsname="XxAJue">
+        <div class="flight-segment-info">
+          ZIPAIR Flight ZG 51 • Operated by ZIPAIR Tokyo • Aircraft: <span class="aircraft-type-span">Boeing 787-8 Dreamliner</span>
+        </div>
+      </div>
+    </li>
+
+    <!-- Card 3: Hawaiian Airlines Airbus (HA 42) -->
+    <li class="flight-card" onclick="toggleExpand(this)">
+      <div class="card-summary">
+        <div class="col-airline">
+          <div class="airline-logo-mock">HA</div>
+          <div class="sSHqwe tPgKwe">
+            <span>Hawaiian</span>
+          </div>
+        </div>
+        <div class="col-route">HNL ➔ SFO (Direct)</div>
+        <div class="col-emissions" data-travelimpactmodelwebsiteurl="https://www.travelimpactmodel.org/lookup/flight?itinerary=HNL-SFO-HA-42-20260520">
+          <div>220 kg CO2e</div>
+          <div>Avg emissions</div>
+        </div>
+      </div>
+      <!-- Aircraft details loaded dynamically when clicked -->
+      <div class="expanded-panel" jsname="XxAJue">
+        <div class="flight-segment-info">
+          Hawaiian Airlines Flight HA 42 • Aircraft: <span class="aircraft-type-span">Airbus A330-200</span> (Free High-speed Starlink Wi-Fi)
+        </div>
+      </div>
+    </li>
+
+    <!-- Card 4: Hawaiian Airlines Boeing (HA 502) -->
+    <li class="flight-card" onclick="toggleExpand(this)">
+      <div class="card-summary">
+        <div class="col-airline">
+          <div class="airline-logo-mock">HA</div>
+          <div class="sSHqwe tPgKwe">
+            <span>Hawaiian</span>
+          </div>
+        </div>
+        <div class="col-route">HNL ➔ OGG (Direct)</div>
+        <div class="col-emissions" data-travelimpactmodelwebsiteurl="https://www.travelimpactmodel.org/lookup/flight?itinerary=HNL-OGG-HA-502-20260520">
+          <div>45 kg CO2e</div>
+          <div>Avg emissions</div>
+        </div>
+      </div>
+      <div class="expanded-panel" jsname="XxAJue">
+        <div class="flight-segment-info">
+          Hawaiian Airlines Flight HA 502 • Inter-island leg • Aircraft: <span class="aircraft-type-span">Boeing 717-200</span> (No Wi-Fi onboard)
+        </div>
+      </div>
+    </li>
+
+    <!-- Card 5: United Airlines - Starlink Confirmed (UA 123) -->
+    <li class="flight-card" onclick="toggleExpand(this)">
+      <div class="card-summary">
+        <div class="col-airline">
+          <div class="airline-logo-mock">UA</div>
+          <div class="sSHqwe tPgKwe">
+            <span>United</span>
+          </div>
+        </div>
+        <div class="col-route">SFO ➔ ORD (Direct)</div>
+        <div class="col-emissions" data-travelimpactmodelwebsiteurl="https://www.travelimpactmodel.org/lookup/flight?itinerary=SFO-ORD-UA-123-20260520">
+          <div>145 kg CO2e</div>
+          <div>Avg emissions</div>
+        </div>
+      </div>
+      <div class="expanded-panel" jsname="XxAJue">
+        <div class="flight-segment-info">
+          United Airlines Flight UA 123 • Aircraft: <span class="aircraft-type-span">Boeing 737 MAX 8</span> (Starlink Equipped)
+        </div>
+      </div>
+    </li>
+
+    <!-- Card 6: United Airlines - Legacy Wifi (UA 999) -->
+    <li class="flight-card" onclick="toggleExpand(this)">
+      <div class="card-summary">
+        <div class="col-airline">
+          <div class="airline-logo-mock">UA</div>
+          <div class="sSHqwe tPgKwe">
+            <span>United</span>
+          </div>
+        </div>
+        <div class="col-route">SFO ➔ EWR (Direct)</div>
+        <div class="col-emissions" data-travelimpactmodelwebsiteurl="https://www.travelimpactmodel.org/lookup/flight?itinerary=SFO-EWR-UA-999-20260520">
+          <div>185 kg CO2e</div>
+          <div>Avg emissions</div>
+        </div>
+      </div>
+      <div class="expanded-panel" jsname="XxAJue">
+        <div class="flight-segment-info">
+          United Airlines Flight UA 999 • Aircraft: <span class="aircraft-type-span">Boeing 777-200ER</span> (Panasonic Wi-Fi)
+        </div>
+      </div>
+    </li>
+
+    <!-- Card 7: Delta Airlines - Legacy Wifi (DL 456) -->
+    <li class="flight-card" onclick="toggleExpand(this)">
+      <div class="card-summary">
+        <div class="col-airline">
+          <div class="airline-logo-mock">DL</div>
+          <div class="sSHqwe tPgKwe">
+            <span>Delta</span>
+          </div>
+        </div>
+        <div class="col-route">LAX ➔ JFK (Direct)</div>
+        <div class="col-emissions" data-travelimpactmodelwebsiteurl="https://www.travelimpactmodel.org/lookup/flight?itinerary=LAX-JFK-DL-456-20260520">
+          <div>190 kg CO2e</div>
+          <div>Avg emissions</div>
+        </div>
+      </div>
+      <div class="expanded-panel" jsname="XxAJue">
+        <div class="flight-segment-info">
+          Delta Air Lines Flight DL 456 • Aircraft: <span class="aircraft-type-span">Boeing 767-300ER</span> (Viasat Wi-Fi)
+        </div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- SCRIPT FOR TEST PAGES INTERACTIVE BEHAVIORS -->
+  <script>
+    // Theme toggle logic
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark-mode');
+      themeBtn.textContent = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+      
+      // Update existing badges and tooltips immediately
+      document.querySelectorAll('.starlink-badge').forEach(badge => {
+        if (isDark) {
+          badge.classList.add('dark-theme');
+        } else {
+          badge.classList.remove('dark-theme');
+        }
+      });
+    });
+
+    // Toggle expand/collapse card
+    function toggleExpand(card) {
+      const panel = card.querySelector('.expanded-panel');
+      if (panel) {
+        panel.classList.toggle('active');
+        // Let the MutationObserver pick up the class changes and trigger text checks!
+      }
+    }
+  </script>
+
+  <!-- LOAD EXTENSION CONTENT SCRIPT -->
+  <script src="content.js"></script>
+</body>
+</html>
